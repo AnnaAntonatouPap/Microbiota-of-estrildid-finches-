@@ -74,7 +74,8 @@ pwc_samplingZF_M
 ## follow the same steps for the rest : female ZB, male BF, female BF and plot as follows
 
 ########################## PLOTING ALPHA DIVERISTY across Sampling times for Zebra finch male ######################################
-
+## From the above analysis we found differences only on the Zebra finch males 
+## Here we box-ploting the 3 different measures of diversity
 # Create a data frame containg Richness , Shannon and meta data
 meta_ploting_ZM
 
@@ -85,7 +86,7 @@ meta_ploting_ZM$sampling <- factor((meta_ploting_M$sampling),levels=c("Fostering
 sampling_colors <-c("#00CCCC","#0066CC","#0000CC","#6600CC","#CC00CC")
 
 # Plot Richness 
-ob_zm <- ggplot(meta_reachnessZM, aes(x=factor(sampling),y=Observed,fill=sampling,colour=sampling))+
+ob_zm <- ggplot(meta_ploting_ZM, aes(x=factor(sampling),y=Observed,fill=sampling,colour=sampling))+
   geom_boxplot( alpha = 0.6) + 
   theme_bw() +
   geom_point(aes(fill=sampling)) + 
@@ -99,7 +100,34 @@ ob_zm <- ggplot(meta_reachnessZM, aes(x=factor(sampling),y=Observed,fill=samplin
   theme(legend.title=element_blank())
   
   # Plot Shannon
-  
+sh_zm <- ggplot(meta_ploting_ZM, aes(x=factor(sampling),y=Shannon,fill=sampling,colour=sampling))+
+  geom_boxplot( alpha = 0.6) + 
+  theme_bw() +
+  geom_point(aes(fill=sampling)) + 
+  theme(axis.text.x = element_blank(),axis.title.x = element_text(size=12),axis.title.y = element_text(size=12))+ #,axis.title.y=element_blank())+
+  theme(legend.position = "none")+
+  scale_fill_manual(values = sampling_colors,aesthetics = c("colour", "fill")) + scale_colour_manual(values = sampling_colors,aesthetics = c("colour", "fill")) +
+  ylab(" Diversity Measure") +
+  xlab("Sampling time") +ggtitle("Shannon") +
+  theme(plot.title = element_text(hjust=0.5,size=13))
+sh_zm
+
+# Plot Faith's PD
+f_zm <- ggplot(meta_phyZFM, aes(x=factor(sampling),y=Phylogenetic_Diversity,fill=sampling,colour=sampling))+
+  geom_boxplot( alpha = 0.6) + 
+  theme_bw() +
+  geom_point(aes(fill=sampling)) + 
+  theme(axis.text.x = element_blank(),axis.title.x = element_text(size=12),axis.title.y = element_text(size=12))+#,axis.title.x=element_blank())
+  theme(legend.position = "none") +
+  scale_fill_manual(values = sampling_colors,aesthetics = c("colour", "fill")) + scale_colour_manual(values = sampling_colors,aesthetics = c("colour", "fill"))
+  ylab("Diversity Measure") +
+  xlab("Sampling time") +ggtitle("Faith's PD") +
+  theme(plot.title = element_text(hjust=0.5,size=13))  
+f_zm
+
+## Combine plots
+figure2 <- ggarrange(ob_zm,sh_zm,f_zm ,ncol=3,common.legend = TRUE, legend="bottom",labels = c("A", "B", "C"))
+figure2
   
   
   
