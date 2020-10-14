@@ -1,0 +1,112 @@
+##### Alpha diveristy based on rarefy Data
+
+# calculate numeric values of alpha diversity indices 
+##  we are only interested on Ricness (i.e Observed) , Shannon , and Faith's PD 
+
+## Richness , Shannon 
+alpha.diversityR <- estimate_richness(rarefyData, 
+                                     measures = c("Shannon","Observed"))
+# prepare data for statistical comparisons 
+data_stats_rarefyData <- cbind(sample_data(rarefyData), alpha.diversityR) 
+
+## Faith's PD 
+phy_df_rarefy <- psmelt(rarefyData)
+meta_phy_rarefy <-meta(rarefyData)
+meta_phy_rarefy$sam_name <- rownames(meta_phy_rarefy)
+
+# Save otu table as data frame
+pd_otu_rarefy <- as.data.frame(rarefyData@otu_table)
+
+# save tree
+pd_tree_rarefy <- rarefyData@phy_tree
+
+# Check if the tree is rooted or not
+rarefyData@phy_tree
+
+# if not convert it to rooted
+pd_tree=multi2di(pd_tree)
+
+# check again if rooted and use this pd_tree
+
+# run and calculate phylogenetic diversity
+dfrarefy.pd <- pd(t(pd_otu_rarefy),pd_tree_rarefy,include.root=T )
+
+#data table of results
+#datatable(df.pd)
+
+# Add results of the Phylogenetic Diversity to the meta-data
+
+meta_phy_rarefy$Phylogenetic_Diversity <- dfrarefy.pd$PD
+
+#### Statistical comparisons of alpha diveristy indices between species ########
+## Shannon
+res_kruska_Shannon_rarefy <-kruskal.test(Shannon ~ species, data_stats_rarefyData)
+effect_size_kruska_Shannon_rarefy <- data_stats_rarefyData %>% kruskal_effsize(Shannon ~ species)
+
+# Check results and effect size 
+effect_size_kruska_Shannon_rarefy 
+res_kruska_Shannon_rarefy
+
+## Richness
+res_kruska_Observed_rarefy <-kruskal.test(Observed ~ species, data_stats_rarefyData)
+effect_size_kruska_Observed_rarefy <- data_stats_rarefyData %>% kruskal_effsize(Observed ~ species)
+
+# Check results and effect size 
+effect_size_kruska_Observed_rarefy
+res_kruska_Observed_rarefy
+
+## Faith's PD
+kruska_PD_rarefy <-kruskal.test(Phylogenetic_Diversity ~ species, meta_phy_rarefy)
+effect_size_kruska_PD_rarefy  <- meta_phy_rarefy %>% kruskal_effsize(Phylogenetic_Diversity ~ species)
+# Check results and effect size 
+effect_size_kruska_PD_rarefy  #0.0005 small
+kruska_PD_rarefy 
+
+## Ploting Shannon , Richness and Faith's PD - boxplot
+# set species colors
+species_colors <- c("#009999","#4C0099")
+# create a table with meta data and  alpha diversity indices : Shannon and Observed  called meta_reachness
+
+# Plot Richness
+ob <- ggplot(meta_reachness, aes(x=factor(species),y=Observed,fill=species,colour=species))+
+  geom_boxplot( alpha = 0.6) + 
+  theme_bw() +
+  geom_point(aes(fill=species)) + 
+  theme(axis.text.x = element_blank(),axis.title.x = element_text(size=12),axis.title.y = element_text(size=12))+
+  scale_fill_manual(values = species_colors,aesthetics = c("colour", "fill"),
+                             breaks=c("Bengalese_Finch","Zebra_Finch"), 
+                             labels=c("Bengalese finch","Zebra finch")) +
+  ylab(" Diversity Measure") +
+  xlab("species") +ggtitle("Observed") +
+  theme(plot.title = element_text(hjust=0.5,size=13))+
+  theme(legend.title=element_blank())
+ob
+
+# Plot Shannon
+sh <- ggplot(meta_reachness, aes(x=factor(species),y=Shannon,fill=species,colour=species))+
+  geom_boxplot( alpha = 0.6) + 
+  theme_bw() +
+  geom_point(aes(fill=species)) + 
+  theme(axis.text.x = element_blank(),axis.title.x = element_text(size=12),axis.title.y = element_text(size=12))+
+  theme(legend.position = "none")+
+  scale_fill_manual(values = species_colors,aesthetics = c("colour", "fill")) + scale_colour_manual(values = species_colors,aesthetics = c("colour", "fill")) +
+  ylab(" Diversity Measure") +xlab("species") +ggtitle("Shannon") +theme(plot.title = element_text(hjust=0.5,size=13))
+sh
+
+# Plot Faith's PD
+f <- ggplot(meta_phy, aes(x=factor(species),y=Phylogenetic_Diversity,fill=species,colour=species))+
+  geom_boxplot( alpha = 0.6) + 
+  theme_bw() +
+  geom_point(aes(fill=species)) + 
+  theme(axis.text.x = element_blank(),axis.title.x = element_text(size=12),axis.title.y = element_text(size=12))+
+  theme(legend.position = "none")+
+  scale_fill_manual(values = species_colors,aesthetics = c("colour", "fill")) + scale_colour_manual(values = species_colors,aesthetics = c("colour", "fill")) +
+  ylab("Diversity Measure") +
+  xlab("species") +ggtitle("Faith's PD") +
+  theme(plot.title = element_text(hjust=0.5,size=13)) + 
+  theme(legend.title=element_blank())
+f
+
+# Combine plots
+figure <- ggarrange(ob,sh,f,ncol=3,common.legend = TRUE, legend="bottom",labels = c("A", "B", "C"))
+figure 
