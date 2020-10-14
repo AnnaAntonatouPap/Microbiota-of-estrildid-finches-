@@ -1,0 +1,150 @@
+##### Calculation of distance matrices for beta diversity analyses based on  Jaccard, Bray–Curtis, Unweighted UniFrac and  weighted unifrac
+
+##CSS data transformation
+## Convert the phyloseq object to a metagenomeSeq object (MRexperiment).
+metagenome.obj <- phyloseq_to_metagenomeSeq(data.1)
+## Calculate the proper percentile by which to normalize counts
+cNstat <- metagenomeSeq::cumNormStatFast(metagenome.obj) 
+# cNstat  #0.5
+## Normalise counts
+metagenome.obj <- metagenomeSeq::cumNorm(metagenome.obj, p = cNstat)
+## Export the normalised count table
+metag.norm.counts <- metagenomeSeq::MRcounts(metagenome.obj, norm = TRUE)
+## Add a pseudocount of 0.0001 to the table and log transform
+metag.norm.counts_log <- log(metag.norm.counts+0.0001)
+## Substract the value from log of pseudocount to preserve zeros of the original counts
+metag.norm.counts_log2 <- metag.norm.counts_log-(log(0.0001))
+
+## Make a new phyloseq object with with the new OTU table
+otu_normMG.obj <- otu_table(metag.norm.counts_log2, taxa_are_rows = TRUE)
+phylo_normMG.obj <- phyloseq(otu_normMG.obj, f_biom_otu_tax@tax_table, f_meta)
+phylo_normMG.obj <- merge_phyloseq(phylo_normMG.obj, f_tree)
+
+
+### Calculate distance matrices
+
+data_pcoa_bray_CSS <- ordinate(
+  physeq = phylo_normMG.obj, 
+  method = "PCoA", 
+  distance = "bray")
+# Ordinate NMDS bray
+data_nmds_bray_CSS  <- ordinate(
+  physeq = phylo_normMG.obj, 
+  method = "NMDS", 
+  distance = "bray")
+# ordinate jaccard NMDS
+data_nmds_jaccard_CSS <- ordinate(
+  physeq = phylo_normMG.obj, 
+  method = "NMDS", 
+  distance = "jaccard",binary= TRUE)
+# ordinate Jaccard PCoA
+data_pcoa_jaccard_CSS  <- ordinate(
+  physeq = phylo_normMG.obj, 
+  method = "PCoA", 
+  distance = "jaccard", binary=TRUE)
+
+# ordinate Unifrac PCoA
+data_pcoa_unifrac_CSS  <- ordinate(
+  physeq = phylo_normMG.obj, 
+  method = "PCoA", 
+  distance = "unifrac")
+# ordinate Unifrac NMDS
+data_nmds_unifrac_CSS  <- ordinate(
+  physeq = phylo_normMG.obj, 
+  method = "NMDS", 
+  distance = "unifrac")
+# ordinate wUnifrac PCoA
+data_pcoa_wunifrac_CSS  <- ordinate(
+  physeq = phylo_normMG.obj, 
+  method = "PCoA", 
+  distance = "wunifrac")
+# ordinate wUnifrac NMDS
+data_nmds_wunifrac_CSS  <- ordinate(
+  physeq = phylo_normMG.obj, 
+  method = "NMDS", 
+  distance = "wunifrac")
+
+# Bray Curtis pcoa
+a=plot_ordination(
+  physeq = phylo_normMG.obj,
+  ordination = data_pcoa_bray_CSS,
+  color = "species",
+  title = "PCoA "
+) + 
+  scale_color_manual(values = c("#009999","#4C0099"),name="", breaks=c("Zebra_Finch","Bengalese_Finch"),
+                     labels=c("Zebra finch","Bengalese finch"))+
+  
+  theme_bw()+
+  ggtitle("Bray-Curtis")+
+  theme(plot.title = element_text(hjust=0.5,size=13)) +
+  #theme(legend.background = element_rect(size=0.3,linetype="solid", colour ="black"))+                      
+  theme(panel.grid.major = element_blank(),panel.grid.minor = element_blank())
+a
+ggsave("pcoa_bray_css_species.pdf" , a, width=150, units ="mm",dpi=300)
+
+
+## jaccard pcoa
+b=plot_ordination(
+  physeq = phylo_normMG.obj,
+  ordination = data_pcoa_jaccard_CSS,
+  color = "species",
+  title = "PCoA "
+) + 
+  scale_color_manual(values = c("#009999","#4C0099"),name="", breaks=c("Zebra_Finch","Bengalese_Finch"),
+                     labels=c("Zebra finch","Bengalese finch"))+
+  
+  theme_bw()+
+  ggtitle("Jaccard")+
+  theme(plot.title = element_text(hjust=0.5,size=13)) +
+  theme(legend.position = "none")+
+  #theme(legend.background = element_rect(size=0.3,linetype="solid", colour ="black"))+                      
+  theme(panel.grid.major = element_blank(),panel.grid.minor = element_blank())
+b
+
+ggsave("pcoa_jaccard_css_species.pdf" , b, width=150, units ="mm",dpi=300)
+
+
+## unifrac PCoA
+c=plot_ordination(
+  physeq = phylo_normMG.obj,
+  ordination = data_pcoa_unifrac_CSS,
+  color = "species",
+  title = "PCoA "
+) + 
+  scale_color_manual(values = c("#009999","#4C0099"),name="", breaks=c("Zebra_Finch","Bengalese_Finch"),
+                     labels=c("Zebra finch","Bengalese finch"))+
+  
+  theme_bw()+
+  ggtitle("Unweighted UniFrac")+
+  theme(plot.title = element_text(hjust=0.5,size=13)) +
+  theme(legend.position = "none")+
+  #theme(legend.background = element_rect(size=0.3,linetype="solid", colour ="black"))+                      
+  theme(panel.grid.major = element_blank(),panel.grid.minor = element_blank())
+c
+ggsave("pcoa_Unifrac_css_species.pdf" , c, width=150, units ="mm",dpi=300)
+
+
+## weighted unifrac PCoA
+d=plot_ordination(
+  physeq = phylo_normMG.obj,
+  ordination = data_pcoa_wunifrac_CSS,
+  color = "species",
+  title = "PCoA "
+) + 
+  scale_color_manual(values = c("#009999","#4C0099"),name="", breaks=c("Zebra_Finch","Bengalese_Finch"),
+                     labels=c("Zebra finch","Bengalese finch"))+
+  
+  theme_bw()+
+  ggtitle("Weighted UniFrac")+
+  theme(plot.title = element_text(hjust=0.5,size=13)) +
+  theme(legend.position = "none")+
+  #theme(legend.background = element_rect(size=0.3,linetype="solid", colour ="black"))+                      
+  theme(panel.grid.major = element_blank(),panel.grid.minor = element_blank())
+d
+ggsave("pcoa_Weighted_Unifrac_css_species.pdf" , d, width=150, units ="mm",dpi=300)
+
+
+### combine plots
+
+figure3 <- ggarrange(a,b,c,d ,ncol=2,nrow=2,common.legend = TRUE, legend="bottom",labels = c("A", "B", "C","D"))
+figure3
