@@ -1,1 +1,90 @@
+## Load data in R - Filtering OTU table 
+#Load libraries
+library(ggplot2)
+library(vegan)
+library(dplyr)
+library(scales)
+library(grid)
+library(reshape2)
+library(phyloseq)
+library(biomformat)
+library(microbiome)
+library(DESeq2)
+library(dunn.test)
+library(rstatix)
+library(ggpubr)
+library(metagenomeSeq)
+library(ape)
+library(rfm)
 
+# Source code files
+# miseqR.R can be found in this repository
+source("C:/Users/AN/Desktop/Work with Oncu/git/R/miseqR.R")
+# Set plotting theme
+theme_set(theme_bw())
+
+############### Import biom file #####################
+# specify directory
+uzdir <- "D:/finch_r/"
+F_biom_file <- paste(uzdir, "grouped.OTUs.0.03.biom", sep ="")
+
+# Now import the .biom-formatted otu_table-tax_table file.
+f_biom_otu_tax <- import_biom(F_biom_file)
+# print tables
+biom_otu_tax@otu_table  # otu table
+biom_otu_tax@tax_table  # taxonomy of ech otu 
+
+# Import Metadata
+f_meta_data  <- read.csv("C:/Users/AN/Desktop/Work with Oncu/finch_project/finch_first_metadata_1.csv")
+
+# convert to phyloseq readable file
+f_meta <- sample_data(f_meta_data)
+
+# assing rownames to be "group" G1,G2 etc
+rownames(f_meta) <- f_meta$group
+
+# specify directory for tree file 
+uzdir <- "D:/finch_r/"
+f_tree_file <- paste(uzdir, "RAxML_bestTree.grouped.OTUs.nwk", sep ="")
+# read tree
+f_tree <- read_tree(f_tree_file, errorIfNULL=TRUE)
+# check if the tree is rooted or not
+# if not convert it to rooted
+f_tree=multi2di(f_tree)
+
+### Final file with metaDta, tree, OTUtable 
+f_data
+
+# Create  factors on sample data
+df <- as.data.frame(lapply(sample_data(f_data),function (y) if(class(y)!="factor" ) as.factor(y) else y),stringsAsFactors=T)
+row.names(df) <- sample_names(f_data)
+sample_data(f_data) <- sample_data(df)
+
+# Check colnames on the tax_table and change  Rank names 
+colnames(tax_table(f_data)) <- c("Kingdom","Phylum","Class",
+                                       "Order","Family","Genus")
+                                       
+############ Filtering unassinged taxa and Mitochodria Chloroplasts ########################
+
+# Filter out Mitochondria and Chloroplasts 
+data.1 <- f_data %>%
+  subset_taxa(
+    ((Family != "Mitochondria") | is.na(Family)) & (Order  != "Chloroplast")
+  )
+
+# Filter out data not assinged to phylum level
+data.1 <- subset_taxa(data.1, !is.na(Phylum) & !Phylum %in% c("", "Bacteria_unclassified"))
+# save otu table
+OTUmatrix =as(otu_table(data.1),"matrix") 
+OTUdf = as.data.frame(OTUmatrix)
+write.csv(OTUdf, "stringentData_OTUtableFilterMitChl.csv")
+# Check how many taxa we removed 
+ntaxa(f_data)
+ntaxa(data.1)                                       
+                                       
+################# Rarefy data - to the lowest read count ##############
+
+rarefyData <- rarefy_even_depth(data.1,rngseed=1, sample.size=min(sample_sums(data.1)), replace=F)
+ntaxa(rarefyData)
+
+# Further analysis like Alpha Diversity it's done based on the rarefy data 
