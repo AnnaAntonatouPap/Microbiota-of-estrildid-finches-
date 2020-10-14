@@ -1,0 +1,116 @@
+## Calculate alpah diveristy for each sex*species (i.e female ZF, male ZF, female ZB,male ZB)
+
+# Saparate data accordingly 
+female_zebraRarefy <- subset_samples(rarefyData, species=="Zebra_Finch" & sex=="Female")
+female_bengaRarefy <- subset_samples(rarefyData, species=="Bengalese_Finch" & sex=="Female")
+male_zebraRarefy <- subset_samples(rarefyData, species=="Zebra_Finch" & sex=="Male")
+male_bengaRarefy <- subset_samples(rarefyData, species=="Bengalese_Finch" & sex=="Male")
+
+############################################### Zebra finch female ########################################################################
+## Numeric values of alpha diversity indices Shnannon and Richness
+alpha.diversityZFf <- estimate_richness(female_zebraRarefy, 
+                                        measures = c("Shannon","Observed"))
+# Combine meta data with alpha diveristy values / Use for statistical analysis 
+data_stats_ZF_f <- cbind(sample_data(female_zebraRarefy), alpha.diversityZFf)
+
+# Calculate Faith's PD
+phy_df <- psmelt(male_zebraRarefy)
+meta_phyZFM <-meta(male_zebraRarefy)
+meta_phyZFM$sam_name <- rownames(meta_phyZFM)
+# Otu table as data frame
+pd_otu <- as.data.frame(male_zebraRarefy@otu_table)
+# Tree
+pd_tree <- male_zebraRarefy@phy_tree
+# Check if the tree is rooted or not
+male_zebraRarefy@phy_tree
+# if not convert it to rooted
+pd_tree=multi2di(pd_tree)
+# Check again if rooted and use this pd_tree
+# Run and calculate phylogenetic diversity
+df.pd <- pd(t(pd_otu),pd_tree,include.root=T )
+# Add results of the pd to this file
+meta_phyZFM$Phylogenetic_Diversity <- df.pd$PD
+
+## Statistics 
+# Compare ech of the alpha diveristy measures acros sampling times by using Kruska- Wallis and as post-hoc Wilcox test if needed 
+
+# Richness
+
+# Kruska Wallis
+res_kruska_Observed_samplingZF_m <-kruskal.test(Observed ~ sampling, data_stats_ZF_M)
+effect_kruska_Observed_samplingZF_m  <- data_stats_ZF_f %>% kruskal_effsize(Observed ~ sampling)
+effect_kruska_Observed_samplingZF_m #0.02 moderate effect size
+res_kruska_Observed_samplingZF_m
+# Wilcox-test
+Wilcx_samplingZF_m <- data_stats_ZF_M %>% 
+  wilcox_test(Observed ~ sampling, p.adjust.method = "bonferroni")
+Wilcx_samplingZF_m
+
+# Shannon
+
+# Kruska wallis
+res_kruska_Shannon_samplingZF_m <-kruskal.test(Shannon~ sampling, data_stats_ZF_M)
+effect_kruska_Shannon_samplingZF_m  <- data_stats_ZF_f %>% kruskal_effsize(Shannon ~ sampling)
+effect_kruska_Shannon_samplingZF_m #0.02 moderate effect size
+res_kruska_Shannon_samplingZF_m
+# Wilcoxon test
+Wilcx_Shan_samplingZF_m <- data_stats_ZF_M %>% 
+  wilcox_test(Shannon ~ sampling, p.adjust.method = "bonferroni")
+Wilcx_Shan_samplingZF_m
+
+# Faith's PD 
+
+# Kruska Wallis
+res_kruska_PD_samplingZF_m <-kruskal.test(Phylogenetic_Diversity~ sampling, meta_phyZFM)
+effect_kruska_PD_samplingZF_m  <- meta_phyZFM %>% kruskal_effsize(Phylogenetic_Diversity ~ sampling)
+effect_kruska_PD_samplingZF_m #0.02 moderate effect size
+res_kruska_PD_samplingZF_m
+
+# Wilcox-test 
+pwc_samplingZF_M <- meta_phyZFM %>% 
+  wilcox_test(Phylogenetic_Diversity ~ sampling, p.adjust.method = "bonferroni")
+pwc_samplingZF_M
+
+## follow the same steps for the rest : female ZB, male BF, female BF and plot as follows
+
+########################## PLOTING ALPHA DIVERISTY across Sampling times for Zebra finch male ######################################
+
+# Create a data frame containg Richness , Shannon and meta data
+meta_ploting_ZM
+
+# Set correct order of the sampling times 
+meta_ploting_ZM$sampling <- factor((meta_ploting_M$sampling),levels=c("Fostering", "Day_5", "Day_10", "Day_35", "Day_100"))
+
+# Set colors
+sampling_colors <-c("#00CCCC","#0066CC","#0000CC","#6600CC","#CC00CC")
+
+# Plot Richness 
+ob_zm <- ggplot(meta_reachnessZM, aes(x=factor(sampling),y=Observed,fill=sampling,colour=sampling))+
+  geom_boxplot( alpha = 0.6) + 
+  theme_bw() +
+  geom_point(aes(fill=sampling)) + 
+  theme(axis.text.x = element_blank(),axis.title.x = element_text(size=12),axis.title.y = element_text(size=12)) +
+  scale_fill_manual(values = sampling_colors,aesthetics = c("colour", "fill"),
+                               breaks=c("Fostering", "Day_5", "Day_10", "Day_35", "Day_100"), 
+                               labels=c("Incubation", "Day 5", "Day 10", "Day 35", "Day 100"))# + 
+  ylab(" Diversity Measure") +
+  xlab("Sampling time") +ggtitle("Observed") +
+  theme(plot.title = element_text(hjust=0.5,size=13))+
+  theme(legend.title=element_blank())
+  
+  # Plot Shannon
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+
