@@ -1,17 +1,21 @@
-##### Calculation of distance matrices for beta diversity analyses based on  Jaccard, Bray–Curtis, Unweighted UniFrac and  weighted unifrac
+##### Calculation of distance matrices for beta diversity analyses based on  Jaccard, Bray–Curtis, Unweighted UniFrac and  Weighted unifrac
 
 ##CSS data transformation
 ## Convert the phyloseq object to a metagenomeSeq object (MRexperiment).
 metagenome.obj <- phyloseq_to_metagenomeSeq(data.1)
+
 ## Calculate the proper percentile by which to normalize counts
 cNstat <- metagenomeSeq::cumNormStatFast(metagenome.obj) 
 # cNstat  #0.5
 ## Normalise counts
 metagenome.obj <- metagenomeSeq::cumNorm(metagenome.obj, p = cNstat)
+
 ## Export the normalised count table
 metag.norm.counts <- metagenomeSeq::MRcounts(metagenome.obj, norm = TRUE)
+
 ## Add a pseudocount of 0.0001 to the table and log transform
 metag.norm.counts_log <- log(metag.norm.counts+0.0001)
+
 ## Substract the value from log of pseudocount to preserve zeros of the original counts
 metag.norm.counts_log2 <- metag.norm.counts_log-(log(0.0001))
 
@@ -22,47 +26,48 @@ phylo_normMG.obj <- merge_phyloseq(phylo_normMG.obj, f_tree)
 
 
 ### Calculate distance matrices
-
+# Ordinate PCoA Bray Curtis
 data_pcoa_bray_CSS <- ordinate(
   physeq = phylo_normMG.obj, 
   method = "PCoA", 
   distance = "bray")
-# Ordinate NMDS bray
+# Ordinate NMDS Bray Curtis
 data_nmds_bray_CSS  <- ordinate(
   physeq = phylo_normMG.obj, 
   method = "NMDS", 
   distance = "bray")
-# ordinate jaccard NMDS
+# ordinate NMDS Jaccard
 data_nmds_jaccard_CSS <- ordinate(
   physeq = phylo_normMG.obj, 
   method = "NMDS", 
   distance = "jaccard",binary= TRUE)
-# ordinate Jaccard PCoA
+# ordinate PCoA Jaccard 
 data_pcoa_jaccard_CSS  <- ordinate(
   physeq = phylo_normMG.obj, 
   method = "PCoA", 
   distance = "jaccard", binary=TRUE)
-
-# ordinate Unifrac PCoA
+# ordinate  PCoA Unweighted Unifrac
 data_pcoa_unifrac_CSS  <- ordinate(
   physeq = phylo_normMG.obj, 
   method = "PCoA", 
   distance = "unifrac")
-# ordinate Unifrac NMDS
+# ordinate NMDS Unweighted Unifrac
 data_nmds_unifrac_CSS  <- ordinate(
   physeq = phylo_normMG.obj, 
   method = "NMDS", 
   distance = "unifrac")
-# ordinate wUnifrac PCoA
+# ordinate PCoA Weighted Unifrac
 data_pcoa_wunifrac_CSS  <- ordinate(
   physeq = phylo_normMG.obj, 
   method = "PCoA", 
   distance = "wunifrac")
-# ordinate wUnifrac NMDS
+# ordinate NMDS Weighted Unifrac
 data_nmds_wunifrac_CSS  <- ordinate(
   physeq = phylo_normMG.obj, 
   method = "NMDS", 
   distance = "wunifrac")
+  
+### PLOT PCoA for each matrix distance  and combine all together in one plot 
 
 # Bray Curtis pcoa
 a=plot_ordination(
@@ -83,7 +88,7 @@ a
 ggsave("pcoa_bray_css_species.pdf" , a, width=150, units ="mm",dpi=300)
 
 
-## jaccard pcoa
+## Jaccard pcoa
 b=plot_ordination(
   physeq = phylo_normMG.obj,
   ordination = data_pcoa_jaccard_CSS,
@@ -104,7 +109,7 @@ b
 ggsave("pcoa_jaccard_css_species.pdf" , b, width=150, units ="mm",dpi=300)
 
 
-## unifrac PCoA
+# Unweighted Unifrac PCoA
 c=plot_ordination(
   physeq = phylo_normMG.obj,
   ordination = data_pcoa_unifrac_CSS,
@@ -124,7 +129,7 @@ c
 ggsave("pcoa_Unifrac_css_species.pdf" , c, width=150, units ="mm",dpi=300)
 
 
-## weighted unifrac PCoA
+## Weighted Unifrac PCoA
 d=plot_ordination(
   physeq = phylo_normMG.obj,
   ordination = data_pcoa_wunifrac_CSS,
@@ -146,5 +151,5 @@ ggsave("pcoa_Weighted_Unifrac_css_species.pdf" , d, width=150, units ="mm",dpi=3
 
 ### combine plots
 
-figure3 <- ggarrange(a,b,c,d ,ncol=2,nrow=2,common.legend = TRUE, legend="bottom",labels = c("A", "B", "C","D"))
-figure3
+figure4 <- ggarrange(a,b,c,d ,ncol=2,nrow=2,common.legend = TRUE, legend="bottom",labels = c("A", "B", "C","D"))
+figure4
