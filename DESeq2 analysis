@@ -1,15 +1,15 @@
-### differential adundance analysis
+                  ################################# Differential adundance analysis ############################################
 #DESeq2 
-# now we want statistically test which OTUS are show differential abundance between species and sex
-library(DESeq2)
+# Here we want statistically test which OTUS are show differential abundance between species
 
 ## Make the DESeq object using phyloseq function .Use species as variable
-# if you don't specifie order the comparison goes alphabeticaly in our case  ZB~BZ
-#baseline is the BZ
-#The order of the names determines the direction of fold change that is reported.
-#The name provided in the second element is the level that is used as baseline. So for example, if we observe
-#a log2 fold change of -2 this would mean the gene expression is lower in ZB relative to the BZ
+# if you don't specifie order the comparison goes alphabeticaly in our case  Zebra finch~Bengalese finch
+# Baseline is the BF
+# The order of the names determines the direction of fold change that is reported.
+# The name provided in the second element is the level that is used as baseline. So for example, if we observe
+# A log2 fold change of -2 this would mean the gene expression is lower in ZF relative to the BF
 dsSpecies <- phyloseq_to_deseq2(data.1, ~species)
+
 ## Run test for differential abundance using negative binomial Wald tets
 dsSpeciestest <-DESeq(dsSpecies,test = "Wald", fitType = "parametric")
 ## Extract the result table that contains log2FC and adj p values (FDR corrected)
@@ -33,28 +33,10 @@ x_species <- tapply(sigtab_species$log2FoldChange, sigtab_species$Phylum, functi
 x_species <- sort(x_species, TRUE)
 sigtab_species$Phylum <- factor(as.character(sigtab_species$Phylum), levels=names(x_species))
 
-## Repeat analyis with sex as variable.
-#male-female 
-#female base line
-### ZERO DIFFERENTIAL ABUDANT otus
-dsSex = phyloseq_to_deseq2(data.1, ~ sex)
-dsSextest = DESeq(dsSex, test="Wald", fitType="parametric")
-res_Sex <- results(dsSextest,cooksCutoff = FALSE)
-alpha <- 0.01
-sigtab_Sex <- res_Sex[which(res_Sex$padj < alpha), ]
-sigtab_Sex <- cbind(as(sigtab_Sex, "data.frame"), as(tax_table(data.1)[rownames(sigtab_Sex), ], "matrix"))
-
-paste( "Overall, we find", length(sigtab_Sex$log2FoldChange)," significantly differentially abundant OTUs with", length(which(sigtab_Sex$log2FoldChange < 0)), "being significantly more abundant in females and", length(which(sigtab_species$log2FoldChange > 0)), "in males.")
-
-sigtab_Sex <- sigtab_age[-which(is.na(sigtab_Sex$Phylum)), ]
-x_Sex <- tapply(sigtab_Sex$log2FoldChange, sigtab_Sex$Phylum, function(x_age) max(x_Sex))
-x_Sex <- sort(x_Sex, TRUE)
-sigtab_Sex$Phylum <- factor(as.character(sigtab_Sex$Phylum), levels=names(x_Sex))
 
 ## Visualization
 deseq_colors=c("#AD6F3B", "#FF8000","#3399FF", "#CC0066" , "#CCCC00")
-# Phylum order
-# species
+
 desq=ggplot(sigtab_species, aes(x=Phylum, y=log2FoldChange, color=Phylum)) +
   geom_point(size=2) + 
   geom_hline(yintercept = 0,linetype = 2, colour="gray44")+
