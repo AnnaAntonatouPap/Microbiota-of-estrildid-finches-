@@ -82,40 +82,39 @@ write.csv(OTUdf, "stringentData_OTUtableFilterMitChl.csv")
 # Check how many taxa we removed 
 ntaxa(f_data)
 ntaxa(data.1)                                       
-######## Plot relative abundance- Family level- stack bar plot ###################################
-# ABUNDANCE FAMILY LEVEL
-## same about Family level 
+                            ######## Plot relative abundance- Family level- stack bar plot ###################################
+# Here we use filtered data                            
+# Create data frame 
 df_family <- data.1 %>%
   tax_glom(taxrank = "Family") %>%                     # agglomerate at phylum level
   transform_sample_counts(function(x) {x/sum(x)} ) %>% # Transform to rel. abundance
   psmelt() %>%                                         # Melt to long format
-  filter(Abundance > 0.01) %>%                    # Filter out low abundance taxa
+  filter(Abundance > 0.01) %>%                         # Filter out low abundance taxa
   arrange(Family)
+  
 #arrange(desc(Abundance))  
 df_family$X <- NULL
-## Define phylum colours
+# Define phylum colours
 family_colors <- c("#673770", "#5F7FC7", "orange","#DA5724", "#508578", "#CD9BCD",
                    "#AD6F3B", "#CBD588","#D14285", "#652926" , "#C84248", "#8569D5", 
                    "#5E738F","#D1A33D", "#8A7C64", "#599861","red","blue","pink","cyan2","cornsilk"
 )
-# re order factor
+# re-order factor "Sampling time"
 correct.order <-c("Fostering", "Day_5", "Day_10", "Day_35", "Day_100")
 sample_data(data.1)$sampling <- factor(sample_data(data.1)$sampling,
                                        levels=correct.order)
+# Define plot labels
+species_labels <- c(Bengalese_Finch = "Bengalese Finch", Zebra_Finch = "Zebra Finch")
+sex_labels <- c(Male="Males",Female="Females")
 samplig_labels <-c( Fostering="Fostering",Day_5="D5",Day_10="D10",Day_35="D35", Day_100="D100")
 
-#PLOT
+# PLOT
 ggplot(df_family, aes(x = Sample, y = Abundance, fill = Family)) + 
   facet_wrap(species~sex~sampling,drop=TRUE,nrow=2,scales="free_x",labeller=labeller(species=species_labels,sex=sex_labels,sampling=samplig_labels)) +
   geom_bar(stat = "identity", position = "stack",width=0.8) +
   theme_bw() +
   scale_fill_manual(values = family_colors) +
   #theme(axis.title.x = element_blank()) + 
-  #
-  
-  #guides(fill = guide_legend(reverse = TRUE, keywidth = 1, keyheight = 1)) +
-  #ylab("Relative Abundance (Phyla > 2%) \n") +
-  #ggtitle("Phylum Composition") 
   theme(axis.text.x = element_blank(),axis.ticks = element_blank(),axis.title.x = element_blank(), axis.title.y = element_text(size=14), axis.text.y = element_text(size=12))+
   guides(fill = guide_legend(keywidth = 1, keyheight = 1)) +
   theme(legend.text = element_text(size = 9),legend.title = element_text(face="bold"),legend.position = "bottom") +
@@ -123,15 +122,16 @@ ggplot(df_family, aes(x = Sample, y = Abundance, fill = Family)) +
   theme(panel.grid.major = element_blank(),panel.grid.minor = element_blank()) +
   theme(panel.spacing.x = unit(0, "lines"))+
   theme(strip.text.x = element_text(size=12), strip.text.y = element_text(size=6))
+ggsave("abunadnace_family.pdf", plot = last_plot(),width=180,height = 100,units="mm",dpi=300)
 
 
-## Define plot labels
-species_labels <- c(Bengalese_Finch = "Bengalese Finch", Zebra_Finch = "Zebra Finch")
-sex_labels <- c(Male="Males",Female="Females")
-
-################# Rarefy data - to the lowest read count ##############
-
+                           ################# Rarefy data - to the lowest read count ##############
 rarefyData <- rarefy_even_depth(data.1,rngseed=1, sample.size=min(sample_sums(data.1)), replace=F)
 ntaxa(rarefyData)
 
 # Further analysis like Alpha Diversity it's done based on the rarefy data 
+# ANOSIM was condacted in Primer program
+
+
+
+
