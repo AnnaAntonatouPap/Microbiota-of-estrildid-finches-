@@ -8,10 +8,15 @@ Authors:
 Öncü Maraci1*, Anna Antonatou-Papaioannou2,3, Sebastian Jünneman4,5, Omar Castillo-Gutiérrez4,5, Tobias Busche5, Jörn Kalinowski5, Barbara A. Caspers1
 
 1Department of Behavioural Ecology, Bielefeld University, Universitätsstraße 25, 33615, Bielefeld, Germany.
+
 2Evolutionary Biology, Bielefeld University, Universitätsstraße 25, 33615, Bielefeld, Germany.
+
 3Institute of Biology-Zoology, Freie Universität Berlin, Köning-Luise-Str. 1-3, 14195, Berlin.
+
 4Faculty of Technology, Bielefeld University, Universitätsstraße 25, 33615, Bielefeld, Germany.
+
 5Center for Biotechnology (CeBiTec), Bielefeld University, Sequenz 1, 33615, Bielefeld, Germany.
+
 
 Microbial communities residing in the gastrointestinal tracts of animals have profound impacts on the physiological processes of their hosts. In humans, host-specific and environmental factors likely interact together to shape gut microbial communities, resulting in remarkable inter-individual differences. However, we still lack a full understanding to what extent microbes are individual-specific and controlled by host-specific factors across different animal taxa. Here, we documented the gut microbial characteristics in two estrildid finch species, the Bengalese finch (Lonchura striata domestica) and the zebra finch (Taeniopygia guttata) to investigate between-species and within-species differences. We collected faecal samples from breeding pairs that were housed under strictly controlled environmental and dietary conditions. All individuals were sampled at five different time points over a range of 120 days covering different stages of the reproductive cycle. We found significant species-specific differences in gut microbial assemblages. Over a period of three months, individuals exhibited unique, individual-specific microbial profiles. Although we found a strong individual signature in both sexes, within-individual variation in microbial communities was larger in males of both species. Furthermore, breeding pairs had more similar microbial profiles, compared to randomly chosen males and females. Our study conclusively showed that host-specific factors contribute structuring of gut microbiota.
 
