@@ -1,8 +1,8 @@
 ## Microbiota-of-estrildid-finches-
 
-Analysis of miccobiome data on R  SHEOWENEJNFKWE;LFKWM MCSD
-D
-LFEJFEFEF
+Analysis of microbiome data on R for the project :
+"The Gut Microbial Composition is Species-specific and Individual-specific in two Species of Estrildid Finches, the Bengalese Finch and the Zebra Finch"
+
 
 
 
