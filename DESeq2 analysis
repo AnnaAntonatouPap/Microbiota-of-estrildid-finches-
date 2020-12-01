@@ -25,6 +25,17 @@ sigtab_species <- cbind(as(sigtab_species, "data.frame"), as(tax_table(data.1)[r
 write.csv(sigtab_species,"DESEq_reults_smalldataset_taxonomyIn.csv")
 paste( "Overall, we find", length(sigtab_species$log2FoldChange)," significantly differentially abundant OTUs with", length(which(sigtab_species$log2FoldChange < 0)), "being significantly more abundant at BF and", length(which(sigtab_species$log2FoldChange > 0)), "at ZF")
 
+## test using lcf and alpha cutoff
+lfc.cutoff =0.58 # actual fold cahnge of 1.5
+sigtab_species_test <- res_species %>%
+  data.frame() %>%
+  rownames_to_column(var="OTU") %>% 
+  as_tibble()
+sigtab_species_test <- sigtab_species_test %>%
+filter(padj <alpha & abs(log2FoldChange) > lfc.cutoff )  ## it gives the same number of differentially abundant taxa
+
+
+##### PLOT RESULSTS########
 ## For plotting remove entries for which the phylum level classification is not available
 sigtab_species <- sigtab_species[-which(is.na(sigtab_species$Phylum)), ]
 
