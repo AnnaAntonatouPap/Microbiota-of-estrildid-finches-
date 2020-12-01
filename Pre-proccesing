@@ -1,5 +1,5 @@
 ## Load data in R - Filtering OTU table 
-#Load libraries
+#Load all the necessary libraries
 library(ggplot2)
 library(vegan)
 library(dplyr)
@@ -21,6 +21,7 @@ library(sjPlot)
 library(lme4)
 library(broom)
 library(multcomp)
+library(rptR)
 # Source code files
 # miseqR.R can be found in this repository
 source("C:/Users/AN/Desktop/Work with Oncu/git/R/miseqR.R")
