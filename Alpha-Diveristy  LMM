@@ -1,0 +1,90 @@
+#################### Alpha diveristy based on rarefy Data ################
+
+# calculate numeric values of alpha diversity indices 
+# we are only interested on  Shannon 
+
+##  Shannon 
+alpha.diversityR <- estimate_richness(rarefyData, 
+                                     measures = c("Shannon")
+# prepare data for statistical comparisons 
+data_stats_rarefyData <- cbind(sample_data(rarefyData), alpha.diversityR) 
+
+
+## Ploting Shannon between species-boxplot
+# set species colors
+species_colors <- c("#009999","#4C0099")
+sh <- ggplot(data_stats_rarefyData, aes(x=factor(species),y=Shannon,fill=species,colour=species))+
+  geom_boxplot( alpha = 0.6) + 
+  theme_bw() +
+  geom_point(aes(fill=species)) + 
+  theme(axis.text.x = element_blank(),axis.title.x = element_text(size=12),axis.title.y = element_text(size=12))+
+  theme(legend.position = "none")+
+  scale_fill_manual(values = species_colors,aesthetics = c("colour", "fill")) + scale_colour_manual(values = species_colors,aesthetics = c("colour", "fill")) +
+  ylab(" Diversity Measure") +xlab("species") +ggtitle("Shannon") +theme(plot.title = element_text(hjust=0.5,size=13))
+sh
+
+############# Further analysis by fitting data in a Linear Mixed Model######################
+# Check distribution of Shannon
+hist(data_stats_rarefyData_LMM$Shannon, main="Shannon diversity", xlab="", breaks=10) 
+# Shapiro test for normality
+shapiro_test(data_stats_rarefyData_LMM$Shannon) # p value > 0.05
+
+### Fit to the model
+# fixed effects: sex,species,sampling time and the interaction sex*sampling time
+# random effects : individual ID ,couple
+
+lmer_fullrarefyShannon <- lmer(Shannon ~ species+sex+time +time:sex +(1|ring_no)+ (1|couple), data=data_stats_rarefyData_LMM)
+summary(lmer_fullrarefyShannon)
+# get R2 marginal and conditional
+r.squaredGLMM(lmer_fullrarefyShannon)
+# get table
+tab_model(lmer_fullrarefyShannon,show.se=TRUE,string.se = "std. Error")
+# model diagnostics ( QQ plot and residual plot)
+ploted_model <-plot(lmer_fullrarefyShannon) # residual
+qqplot <-qqnorm(resid(lmer_fullrarefyShannon))
+
+# Investigate the multiple comparisons wihtin the interactio fixed effect sex*sampling time
+# add the interaction into the dataframe
+data_stats_rarefyData_LMM$int <- interaction(data_stats_rarefyData_LMM$sex, data_stats_rarefyData_LMM$time)
+# run model again
+mod2 <- lmer(Shannon ~ -1 + species + int +(1|ring_no)+ (1|couple), data=data_stats_rarefyData_LMM)
+# Multiple comparisons test  with TukeyHSD
+sampligSexComp<- glht(mod2,mcp(SS="Tukey"))
+#get CI 
+SamplingSexCI <- confint(sampligSexComp)
+
+# Calculate repeatability for ind.ID and coupel ID ater correcting for species and sex
+rep <- rpt(Shannon ~ species+sex+(1 | ring_no) + (1 | couple), 
+         grname = c("ring_no", "couple"), data = data_stats_rarefyData_LMM, datatype = "Gaussian", nboot = 1000, 
+         npermut = 0)
+print(rep)
+
+# From the results we obsreved a significant diiference between males incubation-day 100
+# PLOT alpha diversity Shannon for males across sampling time
+#define colors ( changed in inkscape)
+sampling_colors <-c("#00846b","#6a0084","#840018","#198400","#846b00")
+# subset data only males 
+males_shannon <- subset(data_stats_rarefyData_LMM, sex=="Male")
+#correct order
+correct.order <-c("Fostering", "Day_5", "Day_10", "Day_35", "Day_100")
+males_shannon$sampling <- factor(males_shannon$sampling,
+                                              levels=correct.order)
+ #plot                                             
+SM <- ggplot(males_shannon, aes(x=factor(sampling),y=Shannon,fill=sampling,colour=sampling))+
+  geom_boxplot( alpha = 0.6) + 
+  theme_bw() +
+  geom_point(aes(fill=sampling)) + 
+  theme(axis.text.x = element_blank(),axis.title.x = element_text(size=12),axis.title.y = element_text(size=12))+ #,axis.title.y=element_blank())+
+  theme(legend.position = "none")
+SM <- SM + scale_fill_manual(values = sampling_colors,aesthetics = c("colour", "fill")) + scale_colour_manual(values = sampling_colors,aesthetics = c("colour", "fill"))
+SM <-SM + ylab(" Diversity Measure") +
+  xlab("Sampling time") +ggtitle("Shannon") +
+  theme(plot.title = element_text(hjust=0.5,size=13))
+SM
+
+
+figure2 <- ggarrange(SM,ncol=1, legend="bottom")
+#ggsave("plt_Shannon_sampligMales_3.pdf" , figure2, width=180, units ="mm",dpi=300)
+
+  
+
