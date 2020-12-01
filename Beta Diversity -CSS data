@@ -67,7 +67,7 @@ data_nmds_wunifrac_CSS  <- ordinate(
   method = "NMDS", 
   distance = "wunifrac")
   
-### PLOT PCoA for each matrix distance  and combine all together in one plot 
+### PLOT PCoA for species based on 4 differnet matrices (Bray curtis, Jaccard , weighted Unifrac and Unweighted Unifrac
 
 # Bray Curtis pcoa
 a=plot_ordination(
@@ -148,8 +148,87 @@ d=plot_ordination(
 d
 ggsave("pcoa_Weighted_Unifrac_css_species.pdf" , d, width=150, units ="mm",dpi=300)
 
-
-### combine plots
-
+#combine plots
 figure4 <- ggarrange(a,b,c,d ,ncol=2,nrow=2,common.legend = TRUE, legend="bottom",labels = c("A", "B", "C","D"))
 figure4
+
+############################ plot PCoA based on Bray Curtis  ###################################
+# For a.sex-smapling time b.species-ind.ID and c. species-couple.ID 
+sampling_colors= c("#00846b","#6a0084","#840018","#198400","#846b00")
+a=plot_ordination(
+  physeq = phylo_normMG.obj,
+  ordination = data_pcoa_bray_CSS,
+  color = "sampling",
+  shape="sex",
+  title = "PCoA "
+) + 
+  scale_shape_manual(values = c(15,8),name="", breaks=c("Female","Male"),
+                     labels=c("Female","Male")
+                  )+
+  scale_colour_manual(values=sampling_colors,name="",breaks=c("Fostering", "Day_5", "Day_10", "Day_35", "Day_100"),
+                      labels=c("Incubation", "Day 5", "Day 10", "Day 35", "Day 100"))+
+  
+  theme_bw()+
+  ggtitle("Bray-Curtis")+
+  theme(legend.position = "none")+
+  theme(plot.title = element_text(hjust=0.5,size=13)) +                     
+  theme(panel.grid.major = element_blank(),panel.grid.minor = element_blank())
+a
+figure7 <-ggarrange(a,ncol=1,legend="bottom")
+#figure7
+#ggsave("pcoa_brayCurtis_css_sex_sampling_2.pdf" , figure7, width=150, units ="mm",dpi=300)
+
+b=plot_ordination(
+  physeq = phylo_normMG.obj,
+  ordination = data_pcoa_bray_CSS,
+  color = "couple",
+  shape="species",
+  title = "PCoA "
+) + 
+  scale_shape_manual(values = c(16,17),name="", breaks=c("Zebra_Finch","Bengalese_Finch"),
+                     labels=c("Zebra finch","Bengalese finch")
+  )+
+  scale_color_manual(values = c("#673770", "#5F7FC7", "orange","#DA5724","#508578","#CD9BCD",
+                                "#AD6F3B", "#CBD588","#D14285","#652926","#C84248","#8569D5", 
+                                "#5E738F","#D1A33D", "#8A7C64","#599861","red","blue","pink","cyan2","cornsilk"),
+                     name=NULL,breaks=NULL,labels=NULL)+
+  
+  theme_bw()+
+  ggtitle("Bray-Curtis")+
+  theme(legend.position = "none")+
+  theme(plot.title = element_text(hjust=0.5,size=13)) +                     
+  theme(panel.grid.major = element_blank(),panel.grid.minor = element_blank())
+b
+figure6 <- ggarrange(b,ncol=1,legend="bottom")
+#figure6
+#ggsave("pcoa_BrayCurtis_css_species_couple_1.pdf" ,figure6, width=150, units ="mm",dpi=300)
+
+
+c=plot_ordination(
+  physeq = phylo_normMG.obj,
+  ordination = data_pcoa_bray_CSS,
+  color = "ring_no",
+  shape="species",
+  title = "PCoA "
+) + 
+  scale_shape_manual(values = c(16,17),name="", breaks=c("Zebra_Finch","Bengalese_Finch"),
+                     labels=c("Zebra finch","Bengalese finch")
+  )+
+  scale_color_manual(values = c("#673770", "#5F7FC7", "orange","#DA5724","#508578","#CD9BCD",
+                                "#AD6F3B", "#CBD588","#D14285","#652926","#C84248","#8569D5", 
+                                "#5E738F","#D1A33D", "#8A7C64","#599861","red","blue","pink","cyan2","cornsilk",
+                                "#FFFF00","#FF00FF","#C0C0C0","#800000","#808000","#800080","#008080",
+                                "#000080","#800000","#CD5C5C","#FF4500","#FF8C00","#FFD700","#EEE8AA",
+                                "#808000","#9ACD32","#7CFC00","#98FB98","#20B2AA","#008B8B","#5F9EA0"),
+                     name=NULL,breaks=NULL,labels=NULL)+
+  
+  theme_bw()+
+  ggtitle("Bray-Curtis")+
+  theme(plot.title = element_text(hjust=0.5,size=13)) +
+  theme(legend.position = "none")+                     
+  theme(panel.grid.major = element_blank(),panel.grid.minor = element_blank())
+c
+figure5 <- ggarrange(c,ncol=1,legend="bottom")
+#figure5
+#ggsave("pcoa_BrayCurtis_css_species_id_4.pdf" , figure5, width=150, units ="mm",dpi=300)
+
