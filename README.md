@@ -8,7 +8,7 @@ Authors:
 
 Öncü Maraci, Anna Antonatou-Papaioannou Sebastian Jünneman, Omar Castillo-Gutiérrez, Tobias Busche, Jörn Kalinowski, Barbara A. Caspers
 
-
+In this project, we aim to investigate the impact of host-specific factors on gut microbial communities of in two estrildid finch species, the Bengalese finch and the zebra finch. We housed the breeding-pairs under strictly controlled environmental and dietary conditions and collected faecal samples at five different time points, over a range of 120 days covering different stages of the reproductive cycle. We investigated the differences and similarities between species, sexes, breeding pairs and sampling times in alpha and beta diversity. 
 
 
 
